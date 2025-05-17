@@ -1,3 +1,4 @@
+const Admin = require('../model/Admin');
 const User = require('../model/User');
 const jwt = require('jsonwebtoken')
 
@@ -30,7 +31,13 @@ const handelError = (err) => {
 const maxAge = 3 * 24 * 60 * 60;
 
 const createToken = (id) => {
-    return jwt.sign({ id } , 'This is my login token' , {
+    return jwt.sign({ id } , process.env.LOGIN_TOKEN , {
+        expiresIn: maxAge
+    });
+}
+
+const createAdminToken = (id) => {
+    return jwt.sign({ id } , process.env.ADMIN_LOGIN_TOKEN , {
         expiresIn: maxAge
     });
 }
@@ -46,7 +53,7 @@ module.exports.signup = async (req , res ) => {
     }
     catch(err){
         const errors = handelError(err);
-        res.status(400).json({errors});
+        res.status(400).json({err});
     }
 }
 
@@ -57,8 +64,8 @@ module.exports.login_post = async(req , res) => {
         const user = await User.login(email , password);
         if(user){
             const token = createToken(user._id);
-            res.cookie('jwt' , token , {httpOnly: true , maxAge: maxAge * 1000 })
-            res.status(201).json({user: user._id});
+            res.cookie('jwt' , token , {httpOnly: true , maxAge: maxAge * 1000 ,sameSite: 'none',secure: true} )
+            res.status(201).json({user});
         }
     }
     catch(err) {
@@ -68,6 +75,28 @@ module.exports.login_post = async(req , res) => {
 }
 
 module.exports.logout = (req , res) => {
-    res.cookie('jwt' , '' , {maxAge: 1 })
+    res.cookie('jwt' , '' , {maxAge: 1,sameSite: 'none',secure: true })
     res.status(201).json('cookie deleted');
+}
+
+module.exports.admin_logout = (req , res) => {
+    res.cookie('admin_jwt' , '' , {maxAge: 1,sameSite: 'none',secure: true })
+    res.status(201).json('cookie deleted');
+}
+
+module.exports.login_admin = async(req , res) =>{
+    const { email , password } = req.body;
+
+    try {
+        const user = await Admin.login(email , password);
+        if(user){
+            const token = createAdminToken(user._id);
+            res.cookie('admin_jwt' , token , {httpOnly: true , maxAge: maxAge * 1000 ,sameSite: 'none',secure: true} )
+            res.status(201).json("Login Successfull");
+        }
+    }
+    catch(err) {
+        const errors = handelError(err);
+        res.status(400).json({errors});
+    }
 }

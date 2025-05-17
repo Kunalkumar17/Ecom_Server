@@ -2,17 +2,17 @@ const jwt = require('jsonwebtoken');
 const User = require('../model/User');
 
 const checkUser = (req , res , next) => {
-    const token  = req.cookies.jwt; 
+    const token  = req.cookies.jwt;
     if(token) {
-        jwt.verify(token , 'This is my login token' , async(err , decocedToken) => {
+        jwt.verify(token , process.env.LOGIN_TOKEN , async(err , decodedToken) => {
             if(err){
                 console.log(err.message);
-                res.status(401).json(null);
+                res.status(401).json("Please Login Again");
                 next();
             }
             else{
-                let user = await User.findById(decocedToken.id);
-                res.status(201).json({user});
+                let user = await User.findById(decodedToken.id);
+                res.status(201).json("Success");
                 next();
             }
         })
