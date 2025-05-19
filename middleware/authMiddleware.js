@@ -6,7 +6,6 @@ const checkUser = (req , res , next) => {
     if(token) {
         jwt.verify(token , process.env.LOGIN_TOKEN , async(err , decodedToken) => {
             if(err){
-                console.log(err.message);
                 res.status(401).json("Please Login Again");
                 next();
             }

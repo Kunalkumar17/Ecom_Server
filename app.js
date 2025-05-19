@@ -30,7 +30,7 @@ mongoose.connect(`${process.env.MongoDB_URL}/nike_auth`)
 connectCloudinary();
 
 app.get('/admin', adminAuth);
-app.get('/' , checkUser);
+app.post('/check' , checkUser);
 app.use(productRoutes);
 app.use(authRoutes);
 app.use(cartRoutes);
