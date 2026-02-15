@@ -1,39 +1,26 @@
-require('dotenv').config();
-const express = require('express')
-const mongoose = require('mongoose')
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const authRoutes = require('./routes/authRoutes');
-const { checkUser } = require('./middleware/authMiddleware');
-const  connectCloudinary  = require('./config/cloudinary');
-const productRoutes = require('./routes/productRoutes');
-const { adminAuth } = require('./middleware/adminAuth');
-const cartRoutes = require('./routes/cartRoutes');
-const orderRoutes = require('./routes/orderRoutes');
+import dotenv from "dotenv/config";
+import express from "express"
+import mongoose from "mongoose";
+import cors from "cors"
+import donationsRoutes from "./routes/donations.js"
+const port = process.env.PORT || 3000;
 
 const app = express();
 app.use(express.json());
+app.use(express.static("public"));
 app.use(cors({
-    origin:  [process.env.USER_FRONTEND_URL, process.env.ADMIN_FRONTEND_URL],
+    origin:  [process.env.USER_FRONTEND_URL],
     credentials: true
 }));
-app.use(cookieParser());
-module.exports.currency = "$";
 
-mongoose.connect(`${process.env.MongoDB_URL}/nike_auth`)
+mongoose.connect(process.env.MONGO_URI)
     .then(() => {
-        app.listen(3000, () => {
+        app.listen(port, () => {
             console.log('Server is running on port 3000');
         });
     })
     .catch((err) => console.log(err));
-connectCloudinary();
 
-app.get('/admin', adminAuth);
-app.post('/check' , checkUser);
-app.use(productRoutes);
-app.use(authRoutes);
-app.use(cartRoutes);
-app.use(orderRoutes)
+app.use("/donations", donationsRoutes);
 
 
